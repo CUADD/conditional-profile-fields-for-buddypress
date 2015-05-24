@@ -271,6 +271,11 @@ jQuery( document ).ready( function(){
 			done = true;
 			
 		}
+		if( !done &&  field['type'] =='multiselectbox' ){
+			
+			element = jq('#field_' + field_id +'\\[\\]' );
+			done = true;
+		}
 		if( !done &&  field['type'] =='datebox' ){
 			
 			element = jq('#field_' + field_id + '_day' );

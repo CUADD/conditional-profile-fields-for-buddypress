@@ -225,8 +225,8 @@ class Devb_Conditional_Profile_admin{
                 <option value=">=" class='condition-single' <?php selected( '>=', $operator ) ;?>> >= </option>
                 <option value="<" class='condition-single' <?php selected( '<', $operator ) ;?> > < </option>
                 <option value=">"class='condition-single' <?php selected( '>', $operator ) ;?> > > </option>
-
             </select>
+
             <div class='xprofile-condition-other-field-value-container' id='xprofile-condition-other-field-value-container'>
                 <?php
 
@@ -251,7 +251,6 @@ class Devb_Conditional_Profile_admin{
 
                     $options =  "<input type='text' name='xprofile-condition-other-field-value' id='xprofile-condition-other-field-value' class='xprofile-condition-other-field-value-single' value =''; />";
 
-
                 }
 
                 ?>
@@ -260,7 +259,7 @@ class Devb_Conditional_Profile_admin{
             </div>
             
             </div> 
-			<?php				wp_nonce_field( 'xprofile-condition-edit-action', 'xprofile-condition-edit-nonce' );?>
+			<?php wp_nonce_field( 'xprofile-condition-edit-action', 'xprofile-condition-edit-nonce' );?>
         </div>
 		
         <?php
@@ -268,31 +267,31 @@ class Devb_Conditional_Profile_admin{
     
     public function build_field_dd( $current_field, $selected_field_id ) {
         
-        $groups = BP_XProfile_Group::get( array(
-				'fetch_fields' => true
-		));
-        
-        $html = '';
+
+        if ( !$groups = wp_cache_get( 'xprofile_groups_inc_empty', 'bp' ) ) {
+            $groups = BP_XProfile_Group::get( array( 'fetch_fields' => true ) );
+            wp_cache_set( 'xprofile_groups_inc_empty', $groups, 'bp' );
+        }
+
+        $html .= "<option value='0'> ". _x( 'Select Field', 'Field selection title in admin', 'conditional-profile-fields-for-bp' ) . "</option>";    
         
         foreach( $groups as $group ) {
             //if there are no fields in this group, no need to proceed further
-            if( empty( $group->fields ) )
-                continue;
+            if( empty( $group->fields ) ) continue;
+
             
-            $html .= "<option value='0'> ". _x( 'Select Field', 'Fild selection title in admin', 'conditional-profile-fields-for-bp' ) . "</option>";
-            $html .= "<optgroup label ='{ $group->name }'>";
-           
+            $html .= "<optgroup label = ". mb_strtoupper($group->name) .">";           
             
             foreach( $group->fields as $field ) {
                 
                 //can not have condition for itself
-                if( $field->id == $current_field->id )
-                    continue;
+
+                if ( $field->id == $current_field->id ) continue;
                
                 $field = new BP_XProfile_Field( $field->id, false, false );
                 
-               // $field->type_obj->supports_options;
-                //$field->type_obj->supports_multiple_defaults;
+                // $field->type_obj->supports_options;
+                // $field->type_obj->supports_multiple_defaults;
                 
                 $html .="<option value='{$field->id}'". selected( $field->id, $selected_field_id, false ) ." >{$field->name}</option>";
                 
@@ -314,11 +313,11 @@ class Devb_Conditional_Profile_admin{
             }
             
             $html .= "</optgroup>"; 
-            
-            echo $html;
             //$this->fields_info[]
             
         }
+
+         echo $html;
     }
     
 	/**
@@ -333,7 +332,8 @@ class Devb_Conditional_Profile_admin{
        ?>
         <script type='text/javascript'>
 
-        var xpfields = <?php echo json_encode( $this->fields_info );?>
+        var xpfields = <?php echo json_encode( $this->fields_info );?>;
+
         </script>
     <?php 
     
